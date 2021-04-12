@@ -1,7 +1,9 @@
 class Room{
     public:
-    void function2(){
+    int function2(){
         double ceva;
+        int x;
+        return x;
     }
 }
 int function(){
@@ -18,4 +20,8 @@ int main(){
     int ceva;
     function();
     function2();
+    while(i == 3){
+        i = 1;
+    }
+    string s = "string";
 }

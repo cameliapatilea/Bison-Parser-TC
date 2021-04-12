@@ -4,7 +4,7 @@
 //the evaluated language is c++
 %language "c++"
 
-// Use a type-save variant data structure for storing values
+// Use a type-save variant data structure for storing valoares
 %define api.value.type variant
 
 // Generate the various `make_<TOKEN>` functions
@@ -63,78 +63,99 @@
 %token <int> NUMBER;
 %token <std::string> STRING;
 
+//a c++ program could be made of more components
 program:
     componente
 
+//the components can be empty or made from another components
 componente: 
     %empty | componenta componente
 
+//the component is a class, a global variable or a global function
 componenta:
-    class_definition | variable_declaration | function_definition
+    class_definitie | declarare_variabila | function_definitie
 
 
-class_definition:
-    access_modifier CLASS_KEYWORD IDENTIFIER
-    ACOLADA_DESCHISA class_body ACOLADA_INCHISA
+class_definitie:
+    CLASS_KEYWORD IDENTIFIER
+    ACOLADA_DESCHISA corp_clasa ACOLADA_INCHISA
     {
-        std::cout << "Definire clasa cu numele:  " << $3 << '\n';
+        std::cout << "Definire clasa cu numele:  " << $2 << '\n';
     }
 
-%nterm class_body;
-class_body:
-    definitions
+%nterm corp_clasa;
+corp_clasa:
+    definitii
 
-definitions:
-    %empty | definition definitions
+definitii:
+    %empty | definitie definitii
 
-definition:
+definitie:
     definire_variabila_clasa | definire_metoda_clasa
 
 definire_variabila_clasa:
-    access_modifier   type_identifier name optional_initializer PUNCTVIRGULA
+    type_identifier name optional_initializer PUNCTVIRGULA
     {
-        std::cout << "Definire variabila cu numele:  " << $3 << '\n';
+        std::cout << "Definire variabila cu numele:  " << $2 << '\n';
     }
 
-function_definition:
+function_definitie:
     type_identifier name
-    PARANTEZA_DESCHISA method_arguments  PARANTEZA_INCHISA
-    ACOLADA_DESCHISA method_body  ACOLADA_INCHISA
+    PARANTEZA_DESCHISA argumente_metoda  PARANTEZA_INCHISA
+    ACOLADA_DESCHISA corp_metoda  ACOLADA_INCHISA
     {
-        std::cout << "Defining method " << $2 << '\n';
+        std::cout << "Definire functie: " << $2 << '\n';
     }
     
 
 definire_metoda_clasa:
-    access_modifier   type_identifier name
-     PARANTEZA_DESCHISA method_arguments  PARANTEZA_INCHISA
-    ACOLADA_DESCHISA method_body ACOLADA_INCHISA
+    modificator   type_identifier name
+    PARANTEZA_DESCHISA argumente_metoda  PARANTEZA_INCHISA
+    ACOLADA_DESCHISA corp_metoda ACOLADA_INCHISA
     {
-        std::cout << "Defining method " << $3 << '\n';
+        std::cout << "Definirea metodei: " << $3 << '\n';
     }
 
-method_arguments:
+argumente_metoda:
     %empty
     | argument
-    | argument VIRGULA method_arguments
+    | argument VIRGULA argumente_metoda
 
 argument:
     type_identifier IDENTIFIER
 
-method_body:
+corp_metoda:
     statements
 
 statements:
     %empty | statement statements
 
 statement:
-    variable_declaration
-    | assignment
-    | method_call PUNCTVIRGULA
+    declarare_variabila
+    | asignare
+    | apel_metoda PUNCTVIRGULA
     | instructiune_if
     | instructiune_while
     | return_statement
+    
+declarare_variabila:
+    type_identifier name optional_initializer PUNCTVIRGULA
+    {
+        std::cout << "Definire variabila " << $2 << '\n';
+    }
 
+asignare:
+    name initializer PUNCTVIRGULA
+    {
+        std::cout << "Asignare variabila " << $1 << '\n';
+    }
+
+apel_metoda:
+    referire_metoda
+     PARANTEZA_DESCHISA parametrii  PARANTEZA_INCHISA
+    {
+        std::cout << "Apelare metoda " << $1 << '\n';
+    }
 instructiune_if:
     IF_KEYWORD conditie block
     {
@@ -148,66 +169,49 @@ instructiune_while:
     }
 
 conditie:
-     PARANTEZA_DESCHISA expression  PARANTEZA_INCHISA
+     PARANTEZA_DESCHISA expresie  PARANTEZA_INCHISA
 
 block:
     ACOLADA_DESCHISA statements ACOLADA_INCHISA
 
-variable_declaration:
-    type_identifier name optional_initializer PUNCTVIRGULA
-    {
-        std::cout << "Defining variable " << $2 << '\n';
-    }
 
-assignment:
-    name initializer PUNCTVIRGULA
-    {
-        std::cout << "Assigning to variable " << $1 << '\n';
-    }
-
-method_call:
-    method_reference
-     PARANTEZA_DESCHISA actual_parameters  PARANTEZA_INCHISA
-    {
-        std::cout << "Calling method " << $1 << '\n';
-    }
 
 return_statement:
     RETURN_KEYWORD PUNCTVIRGULA
-    | RETURN_KEYWORD expression PUNCTVIRGULA
+    | RETURN_KEYWORD expresie PUNCTVIRGULA
     {std::cout << "Intalnire cuvant return " << '\n';}
 
-actual_parameters:
+parametrii:
     %empty
-    | value
-    | value VIRGULA actual_parameters
+    | valoare
+    | valoare VIRGULA parametrii
 
-value:
-    name | expression
+valoare:
+    name | expresie
 
-%nterm expression;
-expression:
-    expression PLUS expression
-    | expression MINUS expression
-    | expression MAI_MIC expression
-    | expression MAI_MARE expression
-    | expression EGAL_EGAL expression
-    | expression NOT_EGAL expression
-    | expression MAI_MARE_EGAL expression
-    | expression MAI_MIC_EGAL expression
-    | method_call
+%nterm expresie;
+expresie:
+    expresie PLUS expresie
+    | expresie MINUS expresie
+    | expresie MAI_MIC expresie
+    | expresie MAI_MARE expresie
+    | expresie EGAL_EGAL expresie
+    | expresie NOT_EGAL expresie
+    | expresie MAI_MARE_EGAL expresie
+    | expresie MAI_MIC_EGAL expresie
+    | apel_metoda
     | name
     | literal
 
-%nterm <std::string> method_reference;
-method_reference:
+%nterm <std::string> referire_metoda;
+referire_metoda:
     name
     { $$ = $1; }
-    | name PUNCT method_reference
+    | name PUNCT referire_metoda
     { $$ = $1 + "." + $3; }
 
-%nterm <AccessModifier> access_modifier;
-access_modifier:
+%nterm <AccessModifier> modificator;
+modificator:
     %empty
     { $$ = AccessModifier::DEFAULT; }
     | PUBLIC_KEYWORD
@@ -223,11 +227,11 @@ access_modifier:
 type_identifier:
     IDENTIFIER
     {
-        std::cout << "Referencing object type " << $1 << '\n';
+        std::cout << "Referinta obiect de tipul: " << $1 << '\n';
     }
     | IDENTIFIER PARANTEZA_PATRATA_DESCHISA PARANTEZA_PATRATA_INCHISA
     {
-        std::cout << "Referencing array type " << $1 << "[]" << '\n';
+        std::cout << "Referinta array de tipul: " << $1 << "[]" << '\n';
     }
 
 %nterm <std::string> name;
@@ -238,7 +242,7 @@ optional_initializer:
     %empty | initializer
 
 initializer:
-    EGAL expression
+    EGAL expresie
 
 %nterm <std::string> literal;
 literal:

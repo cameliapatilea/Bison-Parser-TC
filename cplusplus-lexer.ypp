@@ -1,4 +1,4 @@
-
+/** Lexical analyser for Java */
 
 /* Disable unneeded features */
 %option noyywrap nounput noinput batch
