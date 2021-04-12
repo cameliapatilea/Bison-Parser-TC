@@ -15,13 +15,12 @@
     #include "common.hpp"
 }
 
-//we need to declare the method yylex, defined in the lexer later
-
+//we need to declare the method yylex, defined in the
+// Declare the `yylex` method, which will be defined in the lexer
 %code {
     YY_DECL;
 }
 
-//defining the specified tokens
 %%
 
 %token CLASS_KEYWORD;
@@ -30,46 +29,45 @@
 %token PROTECTED_KEYWORD;
 %token PRIVATE_KEYWORD;
 
+%token FINAL_KEYWORD;
+%token STATIC_KEYWORD;
 
 %token IF_KEYWORD;
 %token WHILE_KEYWORD;
 %token RETURN_KEYWORD;
 
-%token STATIC_KEYWORD;
-
-// Operator precedence
-%left LESS_THAN GREATER_THAN;
-%left PLUS MINUS;
-
-%token OPEN_PARENS;
-%token CLOSE_PARENS;
-%token OPEN_BRACKET;
-%token CLOSE_BRACKET;
-%token OPEN_SQUARE_BRACKET;
-%token CLOSE_SQUARE_BRACKET;
-%token EQUALS;
-%token COMMA;
-%token SEMICOLON;
-%token DOT;
+%token  PARANTEZA_DESCHISA;
+%token  PARANTEZA_INCHISA;
+%token ACOLADA_DESCHISA;
+%token ACOLADA_INCHISA;
+%token PARANTEZA_PATRATA_DESCHISA;
+%token PARANTEZA_PATRATA_INCHISA;
+%token EGAL;
+%token VIRGULA;
+%token PUNCTVIRGULA;
+%token PUNCT;
 %token PLUS;
 %token MINUS;
-%token LESS_THAN;
-%token GREATER_THAN;
+%token MAI_MIC;
+%token MAI_MARE;
+%token EGAL_EGAL;
+%token MAI_MARE_EGAL;
+%token MAI_MIC_EGAL;
+%token NOT_EGAL;
+
+// Operator precedence
+%left MAI_MIC MAI_MARE;
+%left PLUS MINUS;
 
 %token <std::string> IDENTIFIER;
 %token <int> NUMBER;
 %token <std::string> STRING;
 
-//define the whole program which is made of more coponents
 program:
     componente
 
-// the components may be empty or contain another component
 componente: 
     %empty | componenta componente
-
-//the possible component of a c++ program could be a class, a global variable or a function
-//to be noted that the class can contain, as well, class variables and class methods
 
 componenta:
     class_definition | variable_declaration | function_definition
@@ -77,9 +75,9 @@ componenta:
 
 class_definition:
     access_modifier CLASS_KEYWORD IDENTIFIER
-    OPEN_BRACKET class_body CLOSE_BRACKET
+    ACOLADA_DESCHISA class_body ACOLADA_INCHISA
     {
-        std::cout << "Defining class " << $3 << '\n';
+        std::cout << "Definire clasa cu numele:  " << $3 << '\n';
     }
 
 %nterm class_body;
@@ -90,34 +88,35 @@ definitions:
     %empty | definition definitions
 
 definition:
-    class_variable_definition | method_definition
+    definire_variabila_clasa | definire_metoda_clasa
 
-class_variable_definition:
-    access_modifier  storage_modifier type_identifier name optional_initializer SEMICOLON
+definire_variabila_clasa:
+    access_modifier   type_identifier name optional_initializer PUNCTVIRGULA
     {
-        std::cout << "Defining variable " << $4 << '\n';
+        std::cout << "Definire variabila cu numele:  " << $3 << '\n';
     }
 
 function_definition:
     type_identifier name
-    OPEN_PARENS method_arguments CLOSE_PARENS
-    OPEN_BRACKET method_body CLOSE_BRACKET
+    PARANTEZA_DESCHISA method_arguments  PARANTEZA_INCHISA
+    ACOLADA_DESCHISA method_body  ACOLADA_INCHISA
     {
         std::cout << "Defining method " << $2 << '\n';
     }
+    
 
-method_definition:
-    access_modifier  storage_modifier type_identifier name
-    OPEN_PARENS method_arguments CLOSE_PARENS
-    OPEN_BRACKET method_body CLOSE_BRACKET
+definire_metoda_clasa:
+    access_modifier   type_identifier name
+     PARANTEZA_DESCHISA method_arguments  PARANTEZA_INCHISA
+    ACOLADA_DESCHISA method_body ACOLADA_INCHISA
     {
-        std::cout << "Defining method " << $4 << '\n';
+        std::cout << "Defining method " << $3 << '\n';
     }
 
 method_arguments:
     %empty
     | argument
-    | argument COMMA method_arguments
+    | argument VIRGULA method_arguments
 
 argument:
     type_identifier IDENTIFIER
@@ -131,56 +130,57 @@ statements:
 statement:
     variable_declaration
     | assignment
-    | method_call SEMICOLON
-    | if_statement
-    | while_statement
+    | method_call PUNCTVIRGULA
+    | instructiune_if
+    | instructiune_while
     | return_statement
 
-if_statement:
-    IF_KEYWORD condition block
+instructiune_if:
+    IF_KEYWORD conditie block
     {
-        std::cout << "if block\n";
+        std::cout << "Definire block if\n";
     }
 
-while_statement:
-    WHILE_KEYWORD condition block
+instructiune_while:
+    WHILE_KEYWORD conditie block
     {
-        std::cout << "while block\n";
+        std::cout << "Definire block while\n";
     }
 
-condition:
-    OPEN_PARENS expression CLOSE_PARENS
+conditie:
+     PARANTEZA_DESCHISA expression  PARANTEZA_INCHISA
 
 block:
-    OPEN_BRACKET statements CLOSE_BRACKET
+    ACOLADA_DESCHISA statements ACOLADA_INCHISA
 
 variable_declaration:
-    type_identifier name optional_initializer SEMICOLON
+    type_identifier name optional_initializer PUNCTVIRGULA
     {
         std::cout << "Defining variable " << $2 << '\n';
     }
 
 assignment:
-    name initializer SEMICOLON
+    name initializer PUNCTVIRGULA
     {
         std::cout << "Assigning to variable " << $1 << '\n';
     }
 
 method_call:
     method_reference
-    OPEN_PARENS actual_parameters CLOSE_PARENS
+     PARANTEZA_DESCHISA actual_parameters  PARANTEZA_INCHISA
     {
         std::cout << "Calling method " << $1 << '\n';
     }
 
 return_statement:
-    RETURN_KEYWORD SEMICOLON
-    | RETURN_KEYWORD expression SEMICOLON
+    RETURN_KEYWORD PUNCTVIRGULA
+    | RETURN_KEYWORD expression PUNCTVIRGULA
+    {std::cout << "Intalnire cuvant return " << '\n';}
 
 actual_parameters:
     %empty
     | value
-    | value COMMA actual_parameters
+    | value VIRGULA actual_parameters
 
 value:
     name | expression
@@ -189,8 +189,12 @@ value:
 expression:
     expression PLUS expression
     | expression MINUS expression
-    | expression LESS_THAN expression
-    | expression GREATER_THAN expression
+    | expression MAI_MIC expression
+    | expression MAI_MARE expression
+    | expression EGAL_EGAL expression
+    | expression NOT_EGAL expression
+    | expression MAI_MARE_EGAL expression
+    | expression MAI_MIC_EGAL expression
     | method_call
     | name
     | literal
@@ -199,7 +203,7 @@ expression:
 method_reference:
     name
     { $$ = $1; }
-    | name DOT method_reference
+    | name PUNCT method_reference
     { $$ = $1 + "." + $3; }
 
 %nterm <AccessModifier> access_modifier;
@@ -215,17 +219,13 @@ access_modifier:
 
 
 
-%nterm <StorageModifier> storage_modifier;
-storage_modifier:
-    %empty
-    { $$ = StorageModifier::STATIC; }
 
 type_identifier:
     IDENTIFIER
     {
         std::cout << "Referencing object type " << $1 << '\n';
     }
-    | IDENTIFIER OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET
+    | IDENTIFIER PARANTEZA_PATRATA_DESCHISA PARANTEZA_PATRATA_INCHISA
     {
         std::cout << "Referencing array type " << $1 << "[]" << '\n';
     }
@@ -238,7 +238,7 @@ optional_initializer:
     %empty | initializer
 
 initializer:
-    EQUALS expression
+    EGAL expression
 
 %nterm <std::string> literal;
 literal:

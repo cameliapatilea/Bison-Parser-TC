@@ -4,15 +4,15 @@ class Room{
         double ceva;
     }
 }
-void function(){
+int function(){
     int ceva = 2;
     string nume;
-    vector v[100];
-    if(2%2 == 0)
-        ceva = ceva +1;
-    while(ceva >0)
-        ceva = ceva - 1;
-    
+    vector v; 
+    if( 1 == 1)
+    {int x = 1;}
+    while(x == 1)
+    {x = x - 1;}
+    return "bla";
 }
 int main(){
     int ceva;

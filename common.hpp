@@ -9,11 +9,3 @@ enum class AccessModifier
     PROTECTED,
     PRIVATE
 };
-
-
-
-enum class StorageModifier
-{
-
-    STATIC
-};
